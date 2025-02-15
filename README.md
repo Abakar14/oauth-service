@@ -1,0 +1,1 @@
+curl -X POST -u client:secret -d "grant_type=client_credentials" http://localhost:8082/oauth2/token 
