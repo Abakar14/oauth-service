@@ -3,6 +3,7 @@ server:
 spring:
   application:
     name: oauth-service
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/auth_service_db
@@ -34,4 +35,6 @@ jpa:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.security.oauth2: TRACE
     org.springframework.web: DEBUG
+

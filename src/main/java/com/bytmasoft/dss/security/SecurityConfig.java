@@ -15,17 +15,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-
-@Bean
-public SecurityFilterChain noOauthSecurityFilterChain(HttpSecurity http) throws Exception {
-	 http
-			 .authorizeHttpRequests(auth->
-					                        auth.anyRequest().authenticated());
-
-	http.formLogin(Customizer.withDefaults());
-
-	return http.build();
-}
+	@Bean
+	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+		http
+				.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+				.formLogin(Customizer.withDefaults());
+		return http.build();
+	}
 
 }

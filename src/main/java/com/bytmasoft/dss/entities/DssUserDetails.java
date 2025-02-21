@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-/*@Log
+@Log
 public class DssUserDetails implements UserDetails {
 
     private User user;
@@ -65,4 +65,4 @@ public class DssUserDetails implements UserDetails {
     public boolean isAccountNonLocked() {
     return true;
     }
-}*/
+}
