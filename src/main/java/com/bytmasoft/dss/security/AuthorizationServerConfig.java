@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -28,11 +29,14 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -56,13 +60,13 @@ public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity h
 			.with(authorizationServerConfigurer, (authorizationServer) ->
 					                                     authorizationServer
 							                                    // .registeredClientRepository(registeredClientRepository())
-							                                     .authorizationServerSettings(authorizationServerSettings())
+							                                    // .authorizationServerSettings(authorizationServerSettings())
 							                                     .oidc(Customizer.withDefaults()))
 
 			.exceptionHandling(exception -> {
-				exception.authenticationEntryPoint(
-						new LoginUrlAuthenticationEntryPoint("/login")
-				);
+				exception.defaultAuthenticationEntryPointFor(
+						new LoginUrlAuthenticationEntryPoint("/login"),
+						new MediaTypeRequestMatcher(MediaType.TEXT_HTML));
 			});
 
 	return http.build();
@@ -74,14 +78,20 @@ public RegisteredClientRepository registeredClientRepository() {
 	RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
 			                                    .clientId("client") // Client ID
 			                                    .clientSecret(passwordEncoder.encode("secret")) // Client Secret
-			                                    .clientAuthenticationMethod(ClientAuthenticationMethod.NONE) // Authentication method
+			                                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) // Authentication method
 			                                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) // Grant type
 			                                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 			                                    .redirectUri("http://localhost:8082")
 			                                    .scope(OidcScopes.OPENID)
+			                                    .tokenSettings(
+														TokenSettings.builder()
+																.accessTokenTimeToLive(Duration.ofHours(1))
+																.build()
+			                                    )
+
 			                                   // .scope("read") // Scopes
 			                                    //.scope("write")
-			                                    .clientSettings(ClientSettings.builder().requireProofKey(true).build())
+			                                    .clientSettings(ClientSettings.builder().requireProofKey(false).build())
 			                                    .build();
 
 	return new InMemoryRegisteredClientRepository(registeredClient);
